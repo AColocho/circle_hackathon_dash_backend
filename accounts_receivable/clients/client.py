@@ -6,6 +6,10 @@ query_db = QueryDB()
 
 router = APIRouter(prefix='/client', tags=['client'])
 
+@router.get('/all')
+async def get_all():
+    return query_db.get_all()
+
 class SearchClient(BaseModel):
     client_id:int = None
     name:str = None

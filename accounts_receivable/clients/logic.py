@@ -7,6 +7,12 @@ class QueryDB(ConnectionDB):
     def __init__(self) -> None:
         super().__init__()
         self.session = Session(self.engine)
+        
+    def get_all(self):
+        sql_query = text('SELECT * FROM client_list;')
+        orm_sql = select(Client).from_statement(sql_query)
+        result = self.session.execute(orm_sql).scalars().all()
+        return [item.__dict__ for item in result]
     
     def search_client(self, query_object):
         for k,v in query_object.dict().items():
