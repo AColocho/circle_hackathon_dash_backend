@@ -1,7 +1,6 @@
 from fastapi import APIRouter
 from pydantic import BaseModel
 from .logic import QueryDB
-import json
 
 query_db = QueryDB()
 
