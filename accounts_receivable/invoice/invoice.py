@@ -1,34 +1,46 @@
 from fastapi import APIRouter
 from pydantic import BaseModel
 from .logic import QueryDB
+import json
 
 query_db = QueryDB()
 
 router = APIRouter(prefix='/invoice', tags=['invoice'])
 
-class Invoice(BaseModel):
+@router.get('/all')
+async def get_all():
+    return query_db.get_all()
+
+class SearchInvoice(BaseModel):
     invoice_id:int = None
     client_id:int = None
-    invoice_date:str = None
     pay_date:str = None
-    client_name:str = None
-    client_phone:str = None
-    client_email:str = None
-    address_1:str = None
-    address_2:str = None
-    city:str = None
-    state:str = None
-    zip_code:str = None
     total:float = None
+    status:str = None
 
 @router.post('/search')
-async def get_invoice(invoice: Invoice):
+async def get_invoice(invoice:SearchInvoice):
     return query_db.search_invoice(invoice)
 
-@router.post('/create')
-async def create_invoice():
-    return 'lol'
+class CreateInvoice(BaseModel):
+    client_id:int
+    pay_date:str
+    line_items:list
+    total:float
+    status:str
 
+@router.post('/create')
+async def create_invoice(invoice:CreateInvoice):
+    query_db.create_invoice(invoice)
+
+class UpdateInvoice(BaseModel):
+    invoice_id:int
+    client_id:int
+    pay_date:str
+    line_items:list
+    total:float
+    status:str
+    
 @router.put('/update')
-async def update_invoice():
-    return 'lol'
+async def update_invoice(invoice:UpdateInvoice):
+    query_db.update_invoice(invoice)

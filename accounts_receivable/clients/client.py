@@ -23,8 +23,7 @@ class SearchClient(BaseModel):
 async def get_client(client:SearchClient):
     return query_db.search_client(client)
 
-class Client(BaseModel):
-    client_id:int
+class CreateClient(BaseModel):
     name:str
     phone:str
     address_1:str
@@ -35,9 +34,20 @@ class Client(BaseModel):
     client_email:str
 
 @router.post('/create')
-async def create_client(client:Client):
+async def create_client(client:CreateClient):
     query_db.create_client(client)
 
+class UpdateClient(BaseModel):
+    client_id:int = None
+    name:str
+    phone:str
+    address_1:str
+    address_2:str = None
+    city:str
+    state:str
+    zipcode:str
+    client_email:str
+
 @router.put('/update')
-async def update_client(client:Client):
+async def update_client(client:UpdateClient):
     query_db.update_client(client)
