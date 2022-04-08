@@ -10,16 +10,14 @@ class QueryDB(ConnectionDB):
         
     def get_all(self):
         sql_query = text('SELECT * FROM client_list;')
-        orm_sql = select(Client).from_statement(sql_query)
-        result = self.session.execute(orm_sql).scalars().all()
+        result = self.session.query(Client).from_statement(sql_query)
         return [item.__dict__ for item in result]
     
     def search_client(self, query_object):
         for k,v in query_object.dict().items():
             if v:
                 sql_query = text(f"SELECT * FROM client_list WHERE {k} ='{v}';")
-                orm_sql = select(Client).from_statement(sql_query)
-                result = self.session.execute(orm_sql).scalars().all()
+                result = self.session.query(Client).from_statement(sql_query)
                 return [item.__dict__ for item in result]
     
     def create_client(self, query_object):
