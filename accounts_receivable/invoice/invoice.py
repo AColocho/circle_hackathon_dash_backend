@@ -42,4 +42,7 @@ class UpdateInvoice(BaseModel):
     
 @router.put('/update')
 async def update_invoice(invoice:UpdateInvoice):
+    """
+    status - "g":generated, "d":draft, "p":paid, "v":void
+    """
     query_db.update_invoice(invoice)

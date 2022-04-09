@@ -12,13 +12,8 @@ class QueryDB(ConnectionDB):
 
     def _process_invoice_(self, object):
         dict_object = object.__dict__
-        # client_info = dict_object.get('client_info').__dict__
         dict_object['line_items'] = json.loads(dict_object['line_items'])
-        
-        # del dict_object['client_info']
-        
-        # dict_object.update(client_info)
-        
+    
         return dict_object
     
     def get_all(self):
@@ -28,7 +23,7 @@ class QueryDB(ConnectionDB):
     def search_invoice(self, query_object):
         for k,v in query_object.dict().items():
             if v:
-                raw_sql = text(f'SELECT * FROM invoice WHERE {k} = {v};')
+                raw_sql = text(f'SELECT * FROM invoice WHERE {k} = "{v}";')
                 sub_query_result = self.session.query(Invoice).from_statement(raw_sql)
                 invoice_ids = [item.__dict__.get('invoice_id') for item in sub_query_result]
                 result = self.session.query(Invoice).join(Client).filter(Invoice.invoice_id.in_(invoice_ids)).all()

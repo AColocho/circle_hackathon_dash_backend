@@ -16,7 +16,7 @@ class QueryDB(ConnectionDB):
     def search_client(self, query_object):
         for k,v in query_object.dict().items():
             if v:
-                sql_query = text(f"SELECT * FROM client_list WHERE {k} ='{v}';")
+                sql_query = text(f"SELECT * FROM client_list WHERE {k} ='{v}'';")
                 result = self.session.query(Client).from_statement(sql_query)
                 return [item.__dict__ for item in result]
     

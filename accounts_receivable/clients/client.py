@@ -35,6 +35,10 @@ class CreateClient(BaseModel):
 
 @router.post('/create')
 async def create_client(client:CreateClient):
+    """
+    state - Two letter code\n
+    phone - must be in +countryCodeArea_codePhone format (+17033004000)
+    """
     query_db.create_client(client)
 
 class UpdateClient(BaseModel):
