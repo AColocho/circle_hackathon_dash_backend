@@ -27,4 +27,6 @@ class Invoice(base):
     line_items = Column(TEXT)
     total = Column(REAL)
     status = Column(TEXT)
+    url = Column(TEXT)
+    payment_id = Column(TEXT)
     client_info = relationship('Client', back_populates='invoice', lazy='joined')

@@ -1,3 +1,6 @@
+from ..connection import ConnectionDB
+from sqlalchemy import insert, update, text
+from sqlalchemy.orm import Session
 import requests as r
 from uuid import uuid4
 from hashlib import blake2b
@@ -5,8 +8,10 @@ import os
 
 os.environ['API_KEY'] = "Bearer QVBJX0tFWTo2ZWRmMjY5ODUxYTJlOTdkOTBkYmU1YTZhYmFjMThmZjpmOGE1YzZhZTIzNzM2OWMzNDIwMjhkZmMxYmFhYjA2NA=="
 
-class Connect:
+class Connect(ConnectionDB):
     def __init__(self) -> None:
+        super().__init__()
+        self.session = Session(self.engine)
         self.headers = { "Accept": "application/json", 
                         "Content-Type": "application/json",
                         "Authorization": os.environ['API_KEY']}
@@ -49,8 +54,12 @@ class Connect:
             "expYear": data['exp_year']
         }
         
-        response = r.post(url, json=card_request, headers=self.headers).json()
+        response = r.post(url, json=card_request, headers=self.headers)
         
+        if response.status_code != 201:
+            return response.json()
+        else:
+            response = response.json()
 
         url = "https://api-sandbox.circle.com/v1/payments"
 
@@ -72,7 +81,13 @@ class Connect:
         }
 
         response = r.post(url, json=card_payment, headers=self.headers).json()
-        return response
+        
+        payment_id = response['data']['id']
+        raw_sql = text(f'UPDATE invoice SET payment_id="{payment_id}", status="p" WHERE invoice_id="{data["invoice_id"]}"')
+        self.session.execute(raw_sql)
+        self.session.commit()
+        
+        return {'payment_id':payment_id}
 
 
     def pay_ach(self, query_object):
@@ -106,9 +121,16 @@ class Connect:
             "plaidProcessorToken": "processor-sandbox-circle-82cf95bb-43f8-4191-8d30-2c9f42853621"
         }
         
-        response = r.post(url, json=ach_request, headers=self.headers).json()
+        response = r.post(url, json=ach_request, headers=self.headers)
+
+        if response.status_code != 201:
+            return response.json()
+        else:
+            response = response.json()
+            
+        url = "https://api-sandbox.circle.com/v1/payments"
         
-        card_payment = {
+        ach_payment = {
             "metadata": ach_request.get('metadata'),
             "amount": {
                 "amount": data['amount'],
@@ -117,7 +139,7 @@ class Connect:
             "autoCapture": True,
             "source": {
                 "id": response['data']['id'],
-                "type": "card"
+                "type": "ach"
             },
             "idempotencyKey": ach_payment_id,
             "keyId": "key1",
@@ -125,8 +147,14 @@ class Connect:
             "description": data['description'],
         }
         
-        response = r.post(url, json=card_payment, headers=self.headers).json()
-        return response
+        response = r.post(url, json=ach_payment, headers=self.headers).json()
+        
+        payment_id = response['data']['id']
+        raw_sql = text(f'UPDATE invoice SET payment_id="{payment_id}", status="p" WHERE invoice_id="{data["invoice_id"]}"')
+        self.session.execute(raw_sql)
+        self.session.commit()
+        
+        return {'payment_id':payment_id}
     
     def pay_blockchain(self, query_object):
         data = query_object.dict()
@@ -154,5 +182,12 @@ class Connect:
         response = r.post(url, json=payload, headers=self.headers).json()
         
         return response
+    
+    def payment_status(self, payment_id):
+        payment_id = payment_id.dict()['payment_id']
+        url = f"https://api-sandbox.circle.com/v1/payments/{payment_id}"
+        
+        return r.get(url, headers=self.headers).json()
+        
     
     

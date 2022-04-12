@@ -30,7 +30,7 @@ class CreateInvoice(BaseModel):
 
 @router.post('/create')
 async def create_invoice(invoice:CreateInvoice):
-    query_db.create_invoice(invoice)
+    return query_db.create_invoice(invoice)
 
 class UpdateInvoice(BaseModel):
     invoice_id:int
@@ -43,6 +43,6 @@ class UpdateInvoice(BaseModel):
 @router.put('/update')
 async def update_invoice(invoice:UpdateInvoice):
     """
-    status - "g":generated, "d":draft, "p":paid, "v":void
+    status - "g":generated, "p":paid, "v":void
     """
     query_db.update_invoice(invoice)

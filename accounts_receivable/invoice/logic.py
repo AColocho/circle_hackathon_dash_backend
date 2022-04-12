@@ -1,8 +1,10 @@
+import secrets
 from ..models import Invoice, Client
-from sqlalchemy import select, insert, update, text
+from sqlalchemy import insert, update, text
 from sqlalchemy.orm import Session
 from ..connection import ConnectionDB
 from datetime import datetime
+from secrets import token_hex
 import json
 
 class QueryDB(ConnectionDB):
@@ -31,11 +33,17 @@ class QueryDB(ConnectionDB):
         
     def create_invoice(self, query_object):
         request = query_object.dict()
+        generate_url = token_hex(50)
         orm_sql = insert(Invoice).values(client_id = request['client_id'], invoice_date = datetime.today().strftime('%Y-%m-%d'),
                                          pay_date = request['pay_date'], line_items = json.dumps(request['line_items']), 
-                                         total = request['total'], status = request['status'])
+                                         total = request['total'], status = request['status'], url = generate_url)
         self.session.execute(orm_sql)
         self.session.commit()
+        
+        orm_sql = self.session.query(Invoice).where(url = generate_url).all()
+        dict_item = orm_sql.__dict__
+        
+        return {'url':generate_url, 'invoice_id':dict_item['invoice_id']}
     
     def update_invoice(self, query_object):
         request = query_object.dict()
