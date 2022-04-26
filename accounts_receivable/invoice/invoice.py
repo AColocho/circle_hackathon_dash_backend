@@ -16,6 +16,7 @@ class SearchInvoice(BaseModel):
     pay_date:str = None
     total:float = None
     status:str = None
+    url:str = None
 
 @router.post('/search')
 async def get_invoice(invoice:SearchInvoice):
