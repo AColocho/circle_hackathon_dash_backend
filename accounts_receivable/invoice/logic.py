@@ -1,6 +1,6 @@
 import secrets
 from ..models import Invoice, Client
-from sqlalchemy import insert, update, text
+from sqlalchemy import insert, update, text, select
 from sqlalchemy.orm import Session
 from ..connection import ConnectionDB
 from datetime import datetime
@@ -40,7 +40,8 @@ class QueryDB(ConnectionDB):
         self.session.execute(orm_sql)
         self.session.commit()
         
-        orm_sql = self.session.query(Invoice).where(url = generate_url).all()
+        orm_query = select(Invoice).where(Invoice.url == generate_url)
+        orm_sql = self.session.execute(orm_query).scalar()
         dict_item = orm_sql.__dict__
         
         return {'url':generate_url, 'invoice_id':dict_item['invoice_id']}
