@@ -8,18 +8,18 @@ from admin import admin
 
 app = FastAPI()
 
-app.include_router(admin.router)
-app.include_router(client.router)
-app.include_router(invoice.router)
-app.include_router(payments.router)
-app.include_router(account.router)
-
-origins = ["http://localhost:3000/"]
+origins = ["*"]
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
     allow_credentials=True,
-    allow_methods=[""],
-    allow_headers=[""],
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
+
+app.include_router(admin.router)
+app.include_router(client.router)
+app.include_router(invoice.router)
+app.include_router(payments.router)
+app.include_router(account.router)
